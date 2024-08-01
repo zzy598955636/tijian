@@ -1,7 +1,7 @@
-package generator.domain;
+package com.example.tijianapi.db.pojo;
 
 import java.io.Serializable;
-import java.util.Date;
+
 import lombok.Data;
 
 /**

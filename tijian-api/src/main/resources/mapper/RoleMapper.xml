@@ -2,19 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="generator.mapper.RoleMapper">
+<mapper namespace="com.example.tijianapi.db.dao.RoleMapper">
 
-    <resultMap id="BaseResultMap" type="generator.domain.RoleEntity">
-            <id property="id" column="id" jdbcType="INTEGER"/>
-            <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
-            <result property="permissions" column="permissions" jdbcType="OTHER"/>
-            <result property="desc" column="desc" jdbcType="VARCHAR"/>
-            <result property="defaultPermissions" column="default_permissions" jdbcType="OTHER"/>
-            <result property="systemic" column="systemic" jdbcType="TINYINT"/>
-    </resultMap>
 
-    <sql id="Base_Column_List">
-        id,role_name,permissions,
-        desc,default_permissions,systemic
-    </sql>
 </mapper>

@@ -1,4 +1,4 @@
-package generator.mapper;
+package com.example.tijianapi.db.dao;
 
 /**
 * @author Lenovo

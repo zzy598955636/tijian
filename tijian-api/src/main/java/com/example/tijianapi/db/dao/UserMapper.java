@@ -1,4 +1,8 @@
-package generator.mapper;
+package com.example.tijianapi.db.dao;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.Set;
 
 /**
 * @author Lenovo
@@ -6,7 +10,9 @@ package generator.mapper;
 * @createDate 2024-07-31 16:29:35
 * @Entity com.example.tijianapi.db.pojo.UserEntity
 */
+@Mapper
 public interface UserMapper {
+    public Set<String> searchUserPermissions(int userId);
 
 }
 

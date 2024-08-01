@@ -2,15 +2,6 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="generator.mapper.CustomerImMapper">
+<mapper namespace="com.example.tijianapi.db.dao.CustomerImMapper">
 
-    <resultMap id="BaseResultMap" type="generator.domain.CustomerImEntity">
-            <id property="id" column="id" jdbcType="INTEGER"/>
-            <result property="customerId" column="customer_id" jdbcType="INTEGER"/>
-            <result property="loginTime" column="login_time" jdbcType="TIMESTAMP"/>
-    </resultMap>
-
-    <sql id="Base_Column_List">
-        id,customer_id,login_time
-    </sql>
 </mapper>
