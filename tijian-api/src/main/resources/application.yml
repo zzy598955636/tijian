@@ -1,6 +1,10 @@
 
 
 spring:
+  cache:
+    redis:
+      time-to-live: 2592000000
+    type: redis
   rabbitmq:
     host: 118.25.19.42
     port: 5672
@@ -122,6 +126,11 @@ server:
       #worker线程池负责调用Web方法
       min: 8
       max: 200
+#  ssl:
+#    enabled: true
+#    key-store-type: PKCS12
+#    key-store: classpath:keystore.p12
+#    key-store-password: 598955636
 
   servlet:
     context-path: /his-api
