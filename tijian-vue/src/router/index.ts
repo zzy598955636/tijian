@@ -15,10 +15,36 @@ const routes : Array<RouteRecordRaw> = [
     },
 
     {
-        path: '/mis',
+        path: '/mis/main',
         name: 'Main',
         component: () => import('../views/mis/main.vue'),
         children: [
+            {
+                path: 'home',
+                name: 'MisHome',
+                component : () => import('../views/mis/home.vue'),
+                meta: {
+                    title: '首页'
+                }
+            },
+            {
+                path: 'dept',
+                name: 'MisDept',
+                component : () => import('../views/mis/dept.vue'),
+                meta: {
+                    title: '部门管理',
+                    isTab: true
+                }
+            },
+            {
+                path: 'role',
+                name: 'MisRole',
+                component : () => import('../views/mis/role.vue'),
+                meta: {
+                    title: '角色管理',
+                    isTab: true
+                }
+            }
             
         ]
     },
@@ -42,27 +68,27 @@ const router = createRouter({
     routes
 });
 
-router.beforeEach((to, from, next) => {
-    let permissions = localStorage.getItem('permissions');
-    let token = localStorage.getItem('token');
-    let fullPath = to.fullPath;
-    console.log(to);
-    if (fullPath.startsWith('/mis') && fullPath != '/mis/login') {
-        if (permissions == null || permissions == '' || token == null || token == '') {
-            next({ name: 'MisLogin' });
-        } else {
-            return next();
-        }
-    } else if (fullPath.startsWith('/front/customer') || fullPath.startsWith('/front/goods_snapshot')) {
-        if (token == null || token == '') {
-            next({ name: 'FrontIndex' });
-        } else {
-            return next();
-        }
-    } else {
-        return next();
-    }
-});
+// router.beforeEach((to, from, next) => {
+//     let permissions = localStorage.getItem('permissions');
+//     let token = localStorage.getItem('token');
+//     let fullPath = to.fullPath;
+//     console.log(to);
+//     if (fullPath.startsWith('/mis') && fullPath != '/mis/login') {
+//         if (permissions == null || permissions == '' || token == null || token == '') {
+//             next({ name: 'MisLogin' });
+//         } else {
+//             return next();
+//         }
+//     } else if (fullPath.startsWith('/front/customer') || fullPath.startsWith('/front/goods_snapshot')) {
+//         if (token == null || token == '') {
+//             next({ name: 'FrontIndex' });
+//         } else {
+//             return next();
+//         }
+//     } else {
+//         return next();
+//     }
+// });
 
 export default router;
 
