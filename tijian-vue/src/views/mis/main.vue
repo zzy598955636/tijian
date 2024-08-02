@@ -192,19 +192,28 @@
         </div>
     </aside>
     <div class="site-content__wrapper">
-    <main class="site-content" :class="{ 'site-content--tabs': true }">
-        <el-tabs>
-            <el-tab-pane label="标签1" name="Tab_1">
-                <el-card>
+    <main class="site-content"
+        :class="{ 'site-content--tabs': $route.meta.isTab }">
+        <el-tabs v-if="$route.meta.isTab"
+            v-model="siteContent.mainTabsActiveName" :closable="true"
+            @tab-click="selectedTabHandle"
+            @tab-remove="removeTabHandle">
+            <el-tab-pane v-for="item in siteContent.mainTabs"
+                :label="item.title" :name="item.name">
+                <el-card :body-style="siteContent.siteContentViewHeight">
                     <router-view :key="router.currentRoute.value.query.random" />
                 </el-card>
             </el-tab-pane>
         </el-tabs>
+        <el-card v-else :body-style="siteContent.siteContentViewHeight">
+            <router-view :key="router.currentRoute.value.query.random" />
+        </el-card>
     </main>
 </div>
 
-    <!-- 避免路由引用页面的时候浏览器不刷新内容，所以给URL添加随机数参数 -->
-    <router-view :key="router.currentRoute.value.query.random" />
+
+
+
 </div>
 
 
@@ -248,6 +257,110 @@
         //是否显示修改登陆密码的弹窗
         updatePasswordVisible: false
     });
+//计算网页可见区域的高度
+function resetDocumentClientHeight() {
+    //获取网页可见区域的高度
+    siteContent.documentClientHeight = document.documentElement.clientHeight;
+}
+
+//计算内容区卡片控件高度
+function loadSiteContentViewHeight() {
+    //卡片控件高度 = 网页可见区域高度 - 导航区高度 - 卡片控件上下外填充 - 上下边框
+    let height = siteContent.documentClientHeight - 50 - 30 - 2;
+    if (route.meta.isTab) {
+        //如果引用的Vue页面需要Tab控件，卡片控件高度还要减去40
+        height -= 40;
+    }
+    //保存卡片控件高度
+    siteContent.height = height
+    //声明CSS样式
+    siteContent.siteContentViewHeight = { minHeight: height + 'px' };
+}
+
+//浏览器尺寸发生变化的回调函数
+window.onresize = () => {
+    //更新保存的网页可见区域高度
+    siteContent.documentClientHeight = document.documentElement.clientHeight;
+    //重新计算内容区的高度
+    loadSiteContentViewHeight();
+};
+
+    function routeHandle(route) {
+        resetDocumentClientHeight();
+    loadSiteContentViewHeight();
+    //判断是否要创建Tab控件
+    if (route.meta.isTab) {
+        /* 创建Tab控件之前，先判断mainTabs[]数组中是否存在该Vue页面的Tab控件。
+         * 比如我们要访问角色管理页面，程序先要判断是否存在角色管理页面的Tab控件。
+         * 如果不存在就创建Tab控件；如果存在就不创建新的Tab控件，直接切换到现有的Tab控件
+         */
+        let tab = siteContent.mainTabs.filter(item => item.name === route.name)[0];
+        if (tab == null) {
+            tab = {
+                title: route.meta.title,
+                name: route.name
+            };
+            siteContent.mainTabs.push(tab);
+        }
+        //选中某个Tab控件
+        siteContent.mainTabsActiveName = tab.name;
+        //选中某个菜单项
+        siteContent.menuActiveName = tab.name;
+    }
+    else {
+        siteContent.mainTabs = []
+        //取消选中某个Tab控件
+        siteContent.mainTabsActiveName = "";
+        //选中某个菜单项
+        siteContent.menuActiveName = "Home";
+    }
+}
+
+
+/* 
+ * 载入框架页面就立即执行routeHandle()函数，把当前路由加载页面对应的Tab控件选中
+ * 例如直接访问http://localhost:7600/mis/role页面，需要让框架页面创建Tab控件，并且选中该Tab
+ */
+routeHandle(route)
+
+/* 
+ * 框架页面的路由标签每次切换引用的页面，就调用routeHandle()，
+ * 判断一下是创建新的Tab控件，还是切换到现有的Tab控件
+ */
+watch(
+    () => router,
+    () => {
+        routeHandle(route);
+    },
+    { immediate: true, deep: true }
+);
+function selectedTabHandle(tab) {
+    router.push({
+        //想必很多同学现在才恍然大悟，为什么要用Vue页面的路由名称作为Tab面板的名字
+        name: tab.paneName
+    });
+}
+function handleSwitch() {
+    sidebar.sidebarFold = !sidebar.sidebarFold;
+}
+
+function removeTabHandle(tabName) {
+    //让mainTabs数组剔除要关闭的Tab
+    siteContent.mainTabs = siteContent.mainTabs.filter(item => item.name !== tabName);
+    //如果还存在剩余的Tab，就切换到最后的Tab上面
+    if (siteContent.mainTabs.length >= 1) {
+        //获取mainTabs数组最后一个元素
+        let tab = siteContent.mainTabs[siteContent.mainTabs.length - 1];
+        //选中这个Tab控件
+        siteContent.mainTabsActiveName = tab.name;
+        //内容区切换引用的页面
+        router.push({ name: tab.name });
+    } else {
+        siteContent.mainTabsActiveName = '';
+        router.push({ name: 'MisHome' });
+    }
+}
+
 </script>
 
 <style lang="scss">
