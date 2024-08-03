@@ -44,6 +44,15 @@ const routes : Array<RouteRecordRaw> = [
                     title: '角色管理',
                     isTab: true
                 }
+            },
+            {
+                path: 'user',
+                name: 'MisUser',
+                component : () => import('../views/mis/user.vue'),
+                meta: {
+                    title: '用户管理',
+                    isTab: true
+                }
             }
             
         ]
