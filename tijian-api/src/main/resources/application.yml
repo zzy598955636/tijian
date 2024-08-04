@@ -134,4 +134,4 @@ server:
 
   servlet:
     context-path: /his-api
-  port: 9999
+  port: 7700

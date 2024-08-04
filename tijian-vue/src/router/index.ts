@@ -15,7 +15,7 @@ const routes : Array<RouteRecordRaw> = [
     },
 
     {
-        path: '/mis/main',
+        path: '/mis',
         name: 'Main',
         component: () => import('../views/mis/main.vue'),
         children: [
@@ -58,14 +58,15 @@ const routes : Array<RouteRecordRaw> = [
         ]
     },
     {
-        path: '/mis/login',
-        name: 'MisLogin',
-        component: () => import('../views/mis/login.vue')
-    },
-    {
         path: '/404',
         name: '404',
         component: () => import('../views/404.vue')
+    },
+    ,
+    {
+        path: '/mis/login',
+        name: 'MisLogin',
+        component: () => import('../views/mis/login.vue')
     },
     {
         path: '/:pathMatch(.*)*',

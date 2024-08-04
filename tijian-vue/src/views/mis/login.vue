@@ -42,9 +42,10 @@
 </template>
 <script lang="ts" setup>
 import { getCurrentInstance, reactive, ref } from 'vue';
+import { isUsername,isPassword } from '../../utils/validate';
 //当用户登陆成功后，需要使用路由对象跳转页面
 import router from '../../router/index';
-import login from "./login.vue";
+import { duration } from 'html2canvas/dist/types/css/property-descriptors/duration';
 const { proxy } = getCurrentInstance();
 
 const loginForm = reactive({
@@ -60,6 +61,54 @@ const qr = reactive({
   qrCodeTimer: null,
   loginTimer: null
 });
+
+function login(){
+  if(!isUsername(loginForm.username)){
+    proxy.$message({
+      message: "用户名不正确",
+      type:"error",
+      duration:2000
+    })
+  }
+  else if(!isPassword(loginForm.password)) {
+    proxy.$message({
+      message: "密码不正确",
+      type:"error",
+      duration:2000
+      })
+    }
+    else {
+      const data = {
+        username: loginForm.username,
+        password: loginForm.password
+      }
+      proxy.$http(
+        "/mis/user/login","POST",
+        data,true, resp =>{
+          if(resp.result){
+            const permissions = resp.permissions
+            const token = resp.token
+            localStorage.setItem("permissions",permissions)
+            localStorage.setItem("token",token)
+            router.push({name:"MisHome"})
+            proxy.$message({
+              message: "登录成功",
+              type:"primary",
+              duration:2000
+            })
+          }else{
+            proxy.$message({
+              message: "登录失败",
+              type:"error",
+              duration:2000
+            })
+          }
+        }
+      )
+    }
+    console.log(loginForm)
+}
+
 </script>
 
 

@@ -361,6 +361,14 @@ function removeTabHandle(tabName) {
     }
 }
 
+function logout() {
+    proxy.$http('/mis/user/logout', 'GET', null, true, function (resp) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('permissions');
+        router.push({ name: 'MisLogin' });
+    });
+}
+
 </script>
 
 <style lang="scss">
