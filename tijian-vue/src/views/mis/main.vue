@@ -216,6 +216,34 @@
 
 </div>
 
+<el-dialog title="提示" v-model="dialog.visible" width="25%">
+    <el-form :model="dialog.dataForm" :rules="dialog.dataRule"
+        ref="dialogForm" label-width="80px">
+        <el-form-item label="原密码" prop="password">
+            <el-input type="password" v-model="dialog.dataForm.password"
+                size="medium" maxlength="20" clearable />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+            <el-input type="password" v-model="dialog.dataForm.newPassword"
+                size="medium" maxlength="20" clearable />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+            <el-input type="password"
+                v-model="dialog.dataForm.confirmPassword" size="medium"
+                maxlength="20" clearable />
+        </el-form-item>
+    </el-form>
+    <template #footer>
+        <span class="dialog-footer">
+            <el-button size="medium"
+                @click="dialog.visible = false">取消</el-button>
+            <el-button type="primary" size="medium"
+                @click="dataFormSubmit">确定</el-button>
+        </span>
+    </template>
+</el-dialog>
+
+
 
 </template>
 
@@ -262,6 +290,69 @@ function resetDocumentClientHeight() {
     //获取网页可见区域的高度
     siteContent.documentClientHeight = document.documentElement.clientHeight;
 }
+
+const validateConfirmPassword = (rule, value, callback) => {
+    if (value != dialog.dataForm.newPassword) {
+        callback(new Error('两次输入的密码不一致'));
+    } else {
+        callback();
+    }
+};
+function updatePassword() {
+    dialog.visible = true;
+    //清空上一次的验证结果
+    proxy.$nextTick(function(){
+        proxy.$refs['dialogForm'].resetFields();
+    })
+}
+function dataFormSubmit() {
+    //验证Form表单中的控件内容
+    proxy.$refs['dialogForm'].validate(valid => {
+        if (valid) {
+            let json = {
+                password: dialog.dataForm.password,
+                newPassword: dialog.dataForm.confirmPassword
+            };
+            proxy.$http('/mis/user/updatePassword', 'POST', json, true, function (resp) {
+                if (resp.rows == 1) {
+                    proxy.$message({
+                        message: '密码修改成功',
+                        type: 'success',
+                        duration: 1200,
+                        onClose: () => {
+                            dialog.visible = false;
+                        }
+                    });
+
+                } else {
+                    proxy.$message({
+                        message: '密码修改失败',
+                        type: 'error',
+                        duration: 1200
+                    });
+                }
+            });
+        }
+    });
+}
+
+const dialog = reactive({
+    visible: false,
+    dataForm: {
+        password: '',
+        newPassword: '',
+        confirmPassword: ''
+    },
+    dataRule: {
+        password: [{ required: true, pattern: '^[a-zA-Z0-9]{6,20}$', message: '密码格式错误' }],
+        newPassword: [{ required: true, pattern: '^[a-zA-Z0-9]{6,20}$', message: '密码格式错误' }],
+        confirmPassword: [
+            { required: true, pattern: '^[a-zA-Z0-9]{6,20}$', message: '密码格式错误' },
+            { validator: validateConfirmPassword, trigger: 'blur' }
+        ]
+    }
+});
+
 
 //计算内容区卡片控件高度
 function loadSiteContentViewHeight() {

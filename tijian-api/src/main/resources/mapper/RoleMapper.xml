@@ -4,5 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.tijianapi.db.dao.RoleMapper">
 
+    <select id="searchAllRole" resultType="HashMap">
+        SELECT id,
+               role_name AS roleName
+        FROM tb_role
+        ORDER BY id
+    </select>
 
 </mapper>

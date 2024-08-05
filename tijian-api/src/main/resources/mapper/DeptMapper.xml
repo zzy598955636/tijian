@@ -4,5 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.tijianapi.db.dao.DeptMapper">
 
+    <select id="searchAllDept" resultType="HashMap">
+        SELECT id,
+               dept_name AS deptName
+        FROM tb_dept
+        ORDER BY id
+    </select>
 
 </mapper>

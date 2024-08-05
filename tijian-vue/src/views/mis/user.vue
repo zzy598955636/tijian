@@ -231,9 +231,81 @@
         name: [{ required: false, pattern: '^[\u4e00-\u9fa5]{1,10}$', message: '姓名格式错误' }]
     });
 
-    function searchHandle() {
-        console.log(dataForm);
+  
+
+    function loadRoleList() {
+    proxy.$http('/mis/role/searchAllRole', 'GET', null, true, function (resp) {
+        dataForm.roleList = resp.list;
+    });
+}
+function loadDeptList() {
+    proxy.$http('/mis/dept/searchAllDept', 'GET', null, true, function (resp) {
+        dataForm.deptList = resp.list;
+    });
+}
+
+//执行两个封装函数
+loadRoleList();
+loadDeptList();
+function loadDataList() {
+    data.loading = true;
+    let json = {
+        page: data.pageIndex,
+        length: data.pageSize,
+        name: dataForm.name,
+        sex: dataForm.sex,
+        role: dataForm.role,
+        deptId: dataForm.deptId,
+        status: dataForm.status
     };
+    proxy.$http('/mis/user/searchByPage', 'POST', json, true, function (resp) {
+        let page = resp.page;
+        let list = page.list;
+        for (let one of list) {
+            if (one.status == 1) {
+                one.status = '在职';
+            } else if (one.status == 2) {
+                one.status = '离职';
+            }
+        }
+        data.dataList = list;
+        data.totalCount = page.totalCount;
+        data.loading = false;
+    });
+}
+
+//调用封装函数，加载分页记录
+loadDataList();
+function searchHandle() {
+    proxy.$refs['form'].validate(valid => {
+        if (valid) {
+            //清理验证结果
+            proxy.$refs['form'].clearValidate();
+            //把空字符串替换成null值
+            if (dataForm.name == '') {
+                dataForm.name = null;
+            }
+            //默认显示第一页数据
+            if (data.pageIndex != 1) {
+                data.pageIndex = 1;
+            }
+            //调用封装函数，加载分页记录
+            loadDataList();
+        } else {
+            return false;
+        }
+    });
+}
+function sizeChangeHandle(val) {
+    data.pageSize = val;
+    data.pageIndex = 1;
+    loadDataList();
+}
+function currentChangeHandle(val) {
+    data.pageIndex = val;
+    loadDataList();
+}
+
 </script>
 <style lang="less" scoped>
     .dialog-input {
