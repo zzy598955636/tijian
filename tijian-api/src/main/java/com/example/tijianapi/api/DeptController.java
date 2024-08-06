@@ -21,5 +21,7 @@ public class DeptController {
         ArrayList<HashMap> list = deptService.searchAllDept();
         return R.ok().put("list", list);
     }
+
+
 }
 

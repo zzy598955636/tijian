@@ -5,8 +5,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.example.tijianapi.common.PageUtils;
 import com.example.tijianapi.db.dao.UserMapper;
+import com.example.tijianapi.db.pojo.UserEntity;
 import com.example.tijianapi.service.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
@@ -67,4 +69,39 @@ public class UserServiceImpl implements UserService {
         PageUtils pageUtils = new PageUtils(list, count, page, length);
         return pageUtils;
     }
+
+    @Override
+    @Transactional
+    public int insert(UserEntity user) {
+        MD5 md5 = MD5.create();
+        String temp = md5.digestHex(user.getUsername());
+        String tempStart = StrUtil.subWithLength(temp, 0, 6);
+        String tempEnd = StrUtil.subSuf(temp, temp.length() - 3);
+        String password = md5.digestHex(tempStart + user.getPassword() + tempEnd).toUpperCase();
+        user.setPassword(password);
+        int rows = userMapper.insert(user);
+        return rows;
+    }
+
+    @Override
+    public HashMap searchById(int userId) {
+        HashMap map = userMapper.searchById(userId);
+        return map;
+    }
+
+    @Override
+    @Transactional
+    public int update(Map param) {
+        int rows = userMapper.update(param);
+        return rows;
+    }
+
+    @Override
+    @Transactional
+    public int deleteByIds(Integer[] ids) {
+        int rows = userMapper.deleteByIds(ids);
+        return rows;
+    }
+
+
 }

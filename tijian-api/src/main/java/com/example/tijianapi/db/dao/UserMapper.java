@@ -1,5 +1,6 @@
 package com.example.tijianapi.db.dao;
 
+import com.example.tijianapi.db.pojo.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.ArrayList;
@@ -25,6 +26,13 @@ public interface UserMapper {
 
     public ArrayList<HashMap> searchByPage(Map param);
     public long searchCount(Map param);
+
+    public int insert(UserEntity user);
+
+    public HashMap searchById(int userId);
+    public int update(Map param);
+
+    public int deleteByIds(Integer[] ids);
 
 }
 

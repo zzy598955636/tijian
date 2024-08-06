@@ -50,7 +50,7 @@
 <el-table :data="data.dataList"
         :header-cell-style="{'background':'#f5f7fa'}" border
         v-loading="data.loading" @selection-change="selectionChangeHandle">
-        <el-table-column type="selection" header-align="center"
+        <el-table-column type="selection" header-align="center" :selectable="selectable"
             align="center" width="50" />
         <el-table-column type="index" header-align="center" align="center"
             width="100" label="序号">
@@ -167,7 +167,8 @@
     import { reactive, getCurrentInstance, ref, onMounted } from 'vue';
     const { proxy } = getCurrentInstance();
     import { dayjs } from 'element-plus';
-
+import { ro } from 'element-plus/es/locale/index.js';
+   
     const dataForm = reactive({
         name: '',
         sex: '',
@@ -186,6 +187,56 @@
         loading: false,
         selections: []
     });
+    function deleteHandle(id) {
+    let ids = id ? [id] : data.selections.map(item => {
+                              return item.id;
+                          });
+    if (ids.length == 0) {
+        proxy.$message({
+            message: '没有选中记录',
+            type: 'warning',
+            duration: 1200
+        });
+    } else {
+        proxy.$confirm('确定要删除选中的记录？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+        })
+        .then(() => {
+            proxy.$http('/mis/user/deleteByIds', 'POST', { ids: ids }, true, function (resp) {
+                if (resp.rows > 0) {
+                    proxy.$message({
+                        message: '操作成功',
+                        type: 'success',
+                        duration: 1200,
+                        onClose: () => {
+                           /*
+                            * 重新加载当前页的分页记录，我们在成功删除记录之后，并不是
+                            * 加载第一页分页记录，而是加载当前页的分页记录，为什么这样
+                            * 做呢？
+                            * 假设我从第一页加载分页数据，那么你就不知道刚才删除的记录
+                            * 到底还在不在了。如果我加载当前页面的分页，你就能很清楚的
+                            * 看明白删除的记录不存在了。有个细节你不用担心，假设我在最
+                            * 后一页删除了所有记录，重新加载分页数据，因为当前页数大于
+                            * 总页数，所以分页控件会显示当前页面的前一页，把它当做最后
+                            * 一页。
+                            */
+                            loadDataList();
+                        }
+                    });
+                } else {
+                    proxy.$message({
+                        message: '未能删除记录',
+                        type: 'warning',
+                        duration: 1200
+                    });
+                }
+            });
+        });
+    }
+}
+
 
     const dialog = reactive({
         visible: true, //调试完静态页面，不要忘记恢复成false
@@ -234,6 +285,7 @@
   
 
     function loadRoleList() {
+        
     proxy.$http('/mis/role/searchAllRole', 'GET', null, true, function (resp) {
         dataForm.roleList = resp.list;
     });
@@ -247,6 +299,7 @@ function loadDeptList() {
 //执行两个封装函数
 loadRoleList();
 loadDeptList();
+
 function loadDataList() {
     data.loading = true;
     let json = {
@@ -277,7 +330,9 @@ function loadDataList() {
 //调用封装函数，加载分页记录
 loadDataList();
 function searchHandle() {
+
     proxy.$refs['form'].validate(valid => {
+        console.log(valid);
         if (valid) {
             //清理验证结果
             proxy.$refs['form'].clearValidate();
@@ -306,6 +361,100 @@ function currentChangeHandle(val) {
     loadDataList();
 }
 
+function addHandle(){
+    dialog.dataForm.id = null;
+    dialog.update = false;
+    dialog.visible = true;
+    proxy.$nextTick(() => {
+        proxy.$refs['dialogForm'].resetFields();
+    });
+
+}
+function selectionChangeHandle(val) {
+    console.log(val)
+    data.selections = val;
+}
+
+
+function dataFormSubmit() {
+        console.log(dialog.dataForm);
+    proxy.$refs['dialogForm'].validate(valid => {
+        if (valid) {
+            let json = {
+                userId: dialog.dataForm.id,
+                username: dialog.dataForm.username,
+                password: dialog.dataForm.password,
+                name: dialog.dataForm.name,
+                sex: dialog.dataForm.sex,
+                tel: dialog.dataForm.tel,
+                email: dialog.dataForm.email,
+                //把日期对象转换成日期字符串
+                hiredate: dayjs(dialog.dataForm.hiredate).format('YYYY-MM-DD'),
+                role: dialog.dataForm.role,
+                deptId: dialog.dataForm.deptId,
+                status: dialog.dataForm.status
+            };
+            // console.log(json);
+            proxy.$http(`/mis/user/${dialog.dataForm.id == null ? 'insert' : 'update'}`, 'POST', json, true, function (resp) { 
+                if (resp.rows == 1) {
+                    proxy.$message({
+                        message: '操作成功',
+                        type: 'success',
+                        duration: 1200,
+                        onClose: () => {
+                            dialog.visible = false;
+                            //重新加载分页数据
+                            loadDataList();
+                        }
+                    });
+
+                } else {
+                    proxy.$message({
+                        message: '操作失败',
+                        type: 'error',
+                        duration: 1200
+                    });
+                }
+            });
+        }
+    });
+
+
+}
+
+function updateHandle(id) {
+    dialog.dataForm.id = id;
+    dialog.update = true;
+    dialog.visible = true;
+    //先把弹窗显示出来，再发送Ajax请求，加载用户信息
+    proxy.$nextTick(() => {
+        let json = {
+            userId: id
+        };
+        proxy.$http('/mis/user/searchById', 'POST', json, true, function (resp) {
+            let result = resp.result;
+            dialog.dataForm.username = result.username;
+            dialog.dataForm.name = result.name;
+            dialog.dataForm.sex = result.sex;
+            dialog.dataForm.tel = result.tel;
+            dialog.dataForm.email = result.email;
+            dialog.dataForm.hiredate = result.hiredate;
+            dialog.dataForm.role = JSON.parse(result.role);
+            dialog.dataForm.deptId = result.deptId;
+            dialog.dataForm.status = result.status;
+        });
+    });
+}
+
+function selectable(row, index) {
+    let temp=row.roles.split("，")
+	  if (temp.includes("超级管理员")) {
+	      return false;
+	  }
+    return true;
+}
+
+ 
 </script>
 <style lang="less" scoped>
     .dialog-input {
