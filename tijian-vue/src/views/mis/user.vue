@@ -454,6 +454,34 @@ function selectable(row, index) {
     return true;
 }
 
+function dismissHandle(id) {
+    proxy.$confirm(`确定设置该用户为离职状态？`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        let json = { userId: id }
+        proxy.$http('/mis/user/dismiss', 'POST', json, true, function (resp) {
+            if (resp.rows == 1) {
+                proxy.$message({
+                    message: '操作成功',
+                    type: 'success',
+                    duration: 1200,
+                    onClose: () => {
+                        loadDataList();
+                    }
+                });
+            } else {
+                proxy.$message({
+                    message: '操作失败',
+                    type: 'warning',
+                    duration: 1200
+                });
+            }
+        });
+    });
+}
+
  
 </script>
 <style lang="less" scoped>

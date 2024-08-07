@@ -185,6 +185,12 @@
 
 
 
+    <update id="dismiss" parameterType="int">
+        UPDATE tb_user
+        SET status = 2
+        WHERE id = #{userId}
+          AND root = FALSE
+    </update>
 
 
 </mapper>

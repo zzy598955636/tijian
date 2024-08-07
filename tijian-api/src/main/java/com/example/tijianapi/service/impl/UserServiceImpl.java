@@ -103,5 +103,11 @@ public class UserServiceImpl implements UserService {
         return rows;
     }
 
+    @Override
+    @Transactional
+    public int dismiss(int userId) {
+        int rows = userMapper.dismiss(userId);
+        return rows;
+    }
 
 }
